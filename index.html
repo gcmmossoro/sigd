@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lista de Prioridade • Diárias Operacionais GCM 2026</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f5f5;
+      color: #1a1a1a;
+      min-height: 100vh;
+    }
+
+    /* LOGIN */
+    .login-screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .login-screen.visible {
+      display: flex;
+    }
+
+    .login-card {
+      background: white;
+      border-radius: 20px;
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 360px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .login-icon {
+      width: 64px;
+      height: 64px;
+      background: #185FA5;
+      border-radius: 16px;
+      margin: 0 auto 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-icon svg {
+      width: 32px;
+      height: 32px;
+      fill: white;
+    }
+
+    .login-card h1 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .login-card p {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 2rem;
+      line-height: 1.5;
+    }
+
+    .btn-google {
+      width: 100%;
+      padding: 9px;
+      font-size: 12px;
+      font-weight: 400;
+      border: none;
+      border-radius: 12px;
+      background: transparent;
+      color: #aaa;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .btn-google:hover {
+      color: #888;
+    }
+
+    .btn-guest {
+      width: 100%;
+      padding: 13px;
+      font-size: 15px;
+      font-weight: 600;
+      border: none;
+      border-radius: 12px;
+      background: #185FA5;
+      color: white;
+      cursor: pointer;
+      margin-top: 0;
+      text-decoration: none;
+    }
+
+    .btn-guest:hover {
+      background: #0C447C;
+    }
+
+    .btn-google svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* APP */
+    .app-screen {
+      display: none;
+    }
+
+    .app-screen.visible {
+      display: block;
+    }
+
+    .app {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+
+    .header {
+      background: #185FA5;
+      color: white;
+      margin: -1rem -1rem 1rem -1rem;
+      padding: 1.25rem 1rem 1rem;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+
+    .header-left h1 {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .header-left p {
+      font-size: 12px;
+      opacity: 0.8;
+      margin-top: 3px;
+    }
+
+    .header-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+    }
+
+    .user-badge {
+      font-size: 11px;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 3px 8px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+
+    .readonly-badge {
+      font-size: 11px;
+      background: rgba(255, 200, 0, 0.3);
+      color: #ffe;
+      padding: 3px 8px;
+      border-radius: 20px;
+    }
+
+    .btn-logout {
+      font-size: 11px;
+      background: rgba(255, 255, 255, 0.15);
+      border: none;
+      color: white;
+      padding: 4px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .btn-login-header {
+      font-size: 11px;
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      padding: 4px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .stats {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .stat {
+      flex: 1;
+      background: white;
+      border-radius: 10px;
+      padding: 10px 12px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: #888;
+    }
+
+    .stat-val {
+      font-size: 22px;
+      font-weight: 600;
+      color: #185FA5;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .btn-ver {
+      flex: 1;
+      padding: 12px;
+      font-size: 13px;
+      font-weight: 500;
+      border: 1.5px solid #185FA5;
+      border-radius: 10px;
+      background: white;
+      color: #185FA5;
+      cursor: pointer;
+    }
+
+    .btn-ver:active {
+      background: #E6F1FB;
+    }
+
+    .btn-pdf {
+      flex: 1;
+      padding: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      background: #185FA5;
+      color: white;
+      cursor: pointer;
+    }
+
+    .btn-pdf:active {
+      background: #0C447C;
+    }
+
+    .btn-pdf:disabled {
+      opacity: 0.6;
+    }
+
+    .search-wrap {
+      position: relative;
+      margin-bottom: 10px;
+    }
+
+    .search-wrap input {
+      width: 100%;
+      padding: 11px 40px 11px 14px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 14px;
+      background: white;
+      color: #1a1a1a;
+      outline: none;
+    }
+
+    .search-wrap input:focus {
+      border-color: #185FA5;
+    }
+
+    .search-icon {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #aaa;
+      font-size: 16px;
+    }
+
+    .undo-bar {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      background: white;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 10px;
+      padding: 8px 12px;
+      margin-bottom: 10px;
+      font-size: 13px;
+      color: #666;
+    }
+
+    .undo-bar.visible {
+      display: flex;
+    }
+
+    .btn-undo {
+      padding: 5px 12px;
+      font-size: 12px;
+      border: 1.5px solid #185FA5;
+      border-radius: 8px;
+      background: transparent;
+      color: #185FA5;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .sync-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 10px;
+      padding: 6px 10px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    }
+
+    .sync-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ccc;
+      flex-shrink: 0;
+    }
+
+    .sync-dot.ok {
+      background: #1D9E75;
+    }
+
+    .sync-dot.saving {
+      background: #EF9F27;
+      animation: blink 0.8s infinite;
+    }
+
+    .sync-dot.error {
+      background: #E24B4A;
+    }
+
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: 0.3
+      }
+    }
+
+    .list-header {
+      display: grid;
+      grid-template-columns: 44px 1fr auto;
+      gap: 8px;
+      padding: 6px 12px;
+      font-size: 10px;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 4px;
+    }
+
+    .scrollable {
+      max-height: 58vh;
+      overflow-y: auto;
+    }
+
+    .guard-item {
+      display: grid;
+      grid-template-columns: 44px 1fr auto;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 12px;
+      background: white;
+      border-radius: 10px;
+      margin-bottom: 6px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.07);
+    }
+
+    .guard-item.editable {
+      cursor: pointer;
+    }
+
+    .guard-item.editable:active {
+      transform: scale(0.98);
+    }
+
+    .guard-item.highlight {
+      outline: 2px solid #185FA5;
+      background: #E6F1FB;
+    }
+
+    .pos-badge {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #f1f1f1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: #666;
+      flex-shrink: 0;
+    }
+
+    .pos-badge.first {
+      background: #FAC775;
+      color: #633806;
+    }
+
+    .pos-badge.last {
+      background: #D3D1C7;
+      color: #444;
+    }
+
+    .guard-name {
+      font-size: 15px;
+      color: #1a1a1a;
+    }
+
+    .guard-actions {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .btn-move {
+      padding: 6px 11px;
+      font-size: 12px;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      background: transparent;
+      color: #666;
+      cursor: pointer;
+      white-space: nowrap;
+      font-weight: 500;
+    }
+
+    .btn-move.danger {
+      border-color: #d85a30;
+      color: #d85a30;
+    }
+
+    .btn-edit-pos {
+      padding: 6px 8px;
+      font-size: 14px;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      background: transparent;
+      color: #888;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .btn-edit-pos:hover {
+      border-color: #185FA5;
+      color: #185FA5;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 2.5rem;
+      color: #aaa;
+      font-size: 14px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 3rem;
+      color: #aaa;
+      font-size: 14px;
+    }
+
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid #e0e0e0;
+      border-top-color: #185FA5;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 12px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* MODAIS */
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .overlay.open {
+      display: flex;
+    }
+
+    .overlay.bottom {
+      align-items: flex-end;
+      padding: 0;
+    }
+
+    .modal-box {
+      background: white;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 340px;
+      padding: 1.5rem;
+    }
+
+    .modal-box h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .modal-box p {
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 1.25rem;
+      line-height: 1.5;
+    }
+
+    .modal-btns {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-confirm {
+      flex: 1;
+      padding: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      background: #d85a30;
+      color: white;
+      cursor: pointer;
+    }
+
+    .btn-cancel-modal {
+      flex: 1;
+      padding: 12px;
+      font-size: 14px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 10px;
+      background: transparent;
+      color: #666;
+      cursor: pointer;
+    }
+
+    /* Modal editar posição */
+    .edit-pos-box {
+      background: white;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 340px;
+      padding: 1.5rem;
+    }
+
+    .edit-pos-box h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .edit-pos-box p {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 1rem;
+    }
+
+    .edit-pos-box input[type=number] {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: 600;
+      color: #185FA5;
+      text-align: center;
+      outline: none;
+      margin-bottom: 1rem;
+    }
+
+    .edit-pos-box input[type=number]:focus {
+      border-color: #185FA5;
+    }
+
+    .edit-pos-btns {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-save-pos {
+      flex: 1;
+      padding: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      background: #185FA5;
+      color: white;
+      cursor: pointer;
+    }
+
+    .btn-cancel-pos {
+      flex: 1;
+      padding: 12px;
+      font-size: 14px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 10px;
+      background: transparent;
+      color: #666;
+      cursor: pointer;
+    }
+
+    /* Modal lista */
+    .sheet {
+      background: white;
+      border-radius: 20px 20px 0 0;
+      width: 100%;
+      max-width: 480px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sheet-header {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .sheet-header h3 {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .sheet-close {
+      background: #f1f1f1;
+      border: none;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      font-size: 14px;
+      color: #666;
+      cursor: pointer;
+    }
+
+    .sheet-body {
+      padding: 1rem 1.25rem;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .sheet-body pre {
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      color: #333;
+      white-space: pre-wrap;
+      line-height: 1.7;
+    }
+
+    .sheet-footer {
+      padding: 0.75rem 1.25rem 1.5rem;
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-copy {
+      flex: 1;
+      padding: 13px;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: 12px;
+      background: #185FA5;
+      color: white;
+      cursor: pointer;
+    }
+
+    .btn-close-sheet {
+      flex: 1;
+      padding: 13px;
+      font-size: 14px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 12px;
+      background: transparent;
+      color: #666;
+      cursor: pointer;
+    }
+
+    .sheet-meta {
+      font-size: 12px;
+      color: #999;
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #3C3489;
+      color: #eee;
+      padding: 11px 20px;
+      border-radius: 24px;
+      font-size: 13px;
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 999;
+      white-space: nowrap;
+      max-width: 90vw;
+      text-align: center;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .readonly-notice {
+      background: #fffbe6;
+      border: 1.5px solid #EF9F27;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #7a5c00;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- TELA DE LOGIN -->
+  <div class="login-screen" id="login-screen">
+    <div class="login-card">
+      <div class="login-icon">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z" />
+        </svg>
+      </div>
+      <h2>Lista de Prioridade</h2>
+      <h1> Diárias Operacionais GCM</h1>
+      <p>Faça login para gerenciar a lista, ou entre como visitante para visualizar.</p>
+      <button class="btn-guest" id="btn-guest">Continuar como visitante</button>
+      <button class="btn-google" id="btn-google-login">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+            fill="#4285F4" />
+          <path
+            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+            fill="#34A853" />
+          <path
+            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+            fill="#FBBC05" />
+          <path
+            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+            fill="#EA4335" />
+        </svg>
+        Entrar com Google
+      </button>
+    </div>
+  </div>
+
+  <!-- APP PRINCIPAL -->
+  <div class="app-screen" id="app-screen">
+    <div class="app">
+      <div class="header">
+        <div class="header-left">
+          <h1>Lista de Prioridade • Diárias Operacionais 2026</h1>
+          <p id="header-subtitle">Carregando...</p>
+        </div>
+        <div class="header-right">
+          <span class="user-badge" id="user-badge"></span>
+          <button class="btn-logout" id="btn-logout" style="display:none">Sair</button>
+          <button class="btn-login-header" id="btn-login-header" style="display:none">Fazer login</button>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">Total de guardas</div>
+          <div class="stat-val" id="total-count">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Movimentações</div>
+          <div class="stat-val" id="move-count">0</div>
+        </div>
+      </div>
+
+      <div class="sync-bar">
+        <div class="sync-dot" id="sync-dot"></div>
+        <span id="sync-msg">Conectando...</span>
+      </div>
+
+      <div class="readonly-notice" id="readonly-notice" style="display:none">
+        Você está no modo visitante — somente visualização.
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-ver" onclick="window._openExport()">Ver lista</button>
+        <button class="btn-pdf" id="btn-pdf" onclick="window._gerarPDF()">⬇ Baixar PDF</button>
+      </div>
+
+      <div class="search-wrap">
+        <input type="text" id="search" placeholder="Buscar guarda pelo nome..." oninput="window._renderList()" />
+        <span class="search-icon">&#128269;</span>
+      </div>
+
+      <div class="undo-bar" id="undo-bar">
+        <span id="undo-msg"></span>
+        <button class="btn-undo" onclick="window._undoLast()">Desfazer</button>
+      </div>
+
+      <div class="list-header">
+        <span>Pos.</span><span>Nome</span><span></span>
+      </div>
+
+      <div class="scrollable" id="guard-list">
+        <div class="loading">
+          <div class="spinner"></div>Carregando lista...
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CONFIRMAR MOVER -->
+  <div class="overlay" id="confirm-overlay">
+    <div class="modal-box">
+      <h3>Confirmar movimentação</h3>
+      <p id="confirm-msg"></p>
+      <div class="modal-btns">
+        <button class="btn-cancel-modal" onclick="window._closeConfirm()">Cancelar</button>
+        <button class="btn-confirm" id="confirm-ok-btn">Mover para o fim</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL EDITAR POSIÇÃO -->
+  <div class="overlay" id="edit-pos-overlay">
+    <div class="edit-pos-box">
+      <h3 id="edit-pos-title">Editar posição</h3>
+      <p id="edit-pos-subtitle"></p>
+      <input type="number" id="edit-pos-input" min="1" placeholder="Nova posição" />
+      <div class="edit-pos-btns">
+        <button class="btn-cancel-pos" onclick="window._closeEditPos()">Cancelar</button>
+        <button class="btn-save-pos" onclick="window._saveEditPos()">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL VER LISTA -->
+  <div class="overlay bottom" id="list-overlay">
+    <div class="sheet">
+      <div class="sheet-header">
+        <h3>Lista atualizada</h3>
+        <button class="sheet-close" onclick="window._closeExport()">&#10005;</button>
+      </div>
+      <div class="sheet-body">
+        <div class="sheet-meta" id="sheet-meta"></div>
+        <pre id="export-text"></pre>
+      </div>
+      <div class="sheet-footer">
+        <button class="btn-copy" onclick="window._copyList()">Copiar lista</button>
+        <button class="btn-close-sheet" onclick="window._closeExport()">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAmPC4vPwZ_dcYY_t4jbud1GCDxX7OGHU8",
+      authDomain: "sigd-1e0cf.firebaseapp.com",
+      projectId: "sigd-1e0cf",
+      storageBucket: "sigd-1e0cf.firebasestorage.app",
+      messagingSenderId: "884768704917",
+      appId: "1:884768704917:web:a5248afe3937c266318e9c",
+      measurementId: "G-Y1PFFDDB9S"
+    };
+
+    const AUTHORIZED_EMAIL = "saviolucasss@gmail.com";
+
+    const firebaseApp = initializeApp(firebaseConfig);
+    const db = getFirestore(firebaseApp);
+    const auth = getAuth(firebaseApp);
+    const provider = new GoogleAuthProvider();
+
+    const defaultGuards = [
+      "Brito Alves", "Rutson", "Zé Neto", "José Medeiros", "Gilliard", "Dorgineide", "Cid", "Albuquerque", "Santos", "Costa Jr",
+      "Gleyton", "Luíz Wagner", "Helderlanio", "Miqueias", "Júlio", "Oziel", "Bismarck", "Cleyton Magno", "Halisson", "Elenildo",
+      "Faustino", "Holanda", "Lucas", "Houddjet", "Monteiro", "Sena", "Joelma", "Hamilton", "Saraiva", "De Lima",
+      "Cleverson", "Gisele", "Emanuel Oliveira", "Vilar", "Camila", "Taylor", "Naldo", "M Mendonça", "Tecio", "Jefferson",
+      "Israel", "Claudio", "Fabiana", "Tavares", "Luciano", "Felipe", "Adson", "Cristina", "Leonardo Brito", "Duarte",
+      "Tertulino", "Thiago Anderson", "De Paiva", "Isaque", "Dantas", "G Filho", "Eronave", "Telma", "M Bizerra", "Aristotenis",
+      "Nóbrega", "Neto", "Josué", "Rivanildo", "Emanuel", "Melody", "Eliesio", "Isabel", "Davi", "Soriano",
+      "Cledson", "Tiberio", "Geraldo Carlos", "Araújo", "Macedo", "Nunes", "Kamilo", "Edinaldo", "Klife", "Abreu",
+      "M Paiva", "Bruno", "Linhares", "J Lima", "Castro", "Nascimento Filho", "Irenilço", "Da Costa", "Alves", "Adailton",
+      "Marcelo", "Xaxa", "Santiago", "F Fonseca", "Azevedo", "M Luciano", "Fagner", "Darlan", "Sobrinho", "Felix",
+      "Vanderley Pinheiro", "M Marques", "Rodrigues", "Ricardo Leandro", "Silva Jr", "Ronivaldo", "Garcia", "Valdenilson", "Matias", "Alcivania",
+      "Deusdedith", "Regi", "Lucena", "Gabriel", "Sousa", "Wagner", "Ferreira", "Ernesto", "Vanderlan", "D Silva",
+      "Alexsandro", "Ananias", "Laercio", "Gonçalves", "Thiago Rocha", "Severino", "R Costa", "Rocha", "Manuel Sabino", "S Lima",
+      "J Silva", "Leão", "Dos Santos", "Altevania", "Ismael", "Mendonça", "Kappergianny", "Cássio"
+    ];
+
+    let guards = [];
+    let moveCount = 0;
+    let lastSnapshot = null;
+    let highlightId = null;
+    let pendingGuardId = null;
+    let editingGuardId = null;
+    let isAdmin = false;
+    let isGuest = false;
+
+    // ---- AUTH ----
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        if (user.email === AUTHORIZED_EMAIL) {
+          isAdmin = true; isGuest = false;
+          showApp(user.displayName || user.email);
+        } else {
+          signOut(auth);
+          showToast('Acesso negado: e-mail não autorizado.');
+          showLogin();
+        }
+      }
+    });
+
+    document.getElementById('btn-google-login').onclick = async () => {
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (e) {
+        showToast('Erro ao fazer login.');
+        console.error(e);
+      }
+    };
+
+    document.getElementById('btn-guest').onclick = () => {
+      isAdmin = false; isGuest = true;
+      showApp('Visitante');
+    };
+
+    document.getElementById('btn-logout').onclick = async () => {
+      await signOut(auth);
+      isAdmin = false; isGuest = false;
+      guards = []; moveCount = 0;
+      showLogin();
+    };
+
+    document.getElementById('btn-login-header').onclick = () => {
+      showLogin();
+    };
+
+    function showLogin() {
+      document.getElementById('login-screen').classList.add('visible');
+      document.getElementById('app-screen').classList.remove('visible');
+    }
+
+    function showApp(name) {
+      document.getElementById('login-screen').classList.remove('visible');
+      document.getElementById('app-screen').classList.add('visible');
+      document.getElementById('user-badge').textContent = isAdmin ? '✓ ' + name : '👁 Visitante';
+      document.getElementById('header-subtitle').textContent = isAdmin ? 'Toque em "Ir pro fim" para mover' : 'Modo somente visualização';
+      document.getElementById('btn-logout').style.display = isAdmin ? 'block' : 'none';
+      document.getElementById('btn-login-header').style.display = isGuest ? 'block' : 'none';
+      document.getElementById('readonly-notice').style.display = isGuest ? 'block' : 'none';
+      document.getElementById('undo-bar').classList.remove('visible');
+      carregarDoFirebase();
+    }
+
+    // ---- FIREBASE ----
+    function setSyncStatus(status, msg) {
+      document.getElementById('sync-dot').className = 'sync-dot ' + status;
+      document.getElementById('sync-msg').textContent = msg;
+    }
+
+    async function salvarNoFirebase() {
+      if (!isAdmin) return;
+      setSyncStatus('saving', 'Salvando...');
+      try {
+        await setDoc(doc(db, 'escala', 'guardas'), {
+          ordem: guards.map(g => g.name),
+          movimentacoes: moveCount,
+          atualizado: new Date().toISOString()
+        });
+        setSyncStatus('ok', 'Salvo no banco ✓');
+      } catch (e) {
+        setSyncStatus('error', 'Erro ao salvar');
+        console.error(e);
+      }
+    }
+
+    async function carregarDoFirebase() {
+      setSyncStatus('saving', 'Carregando...');
+      try {
+        const snap = await getDoc(doc(db, 'escala', 'guardas'));
+        if (snap.exists()) {
+          const data = snap.data();
+          guards = data.ordem.map((name, i) => ({ id: i, name }));
+          moveCount = data.movimentacoes || 0;
+          document.getElementById('move-count').textContent = moveCount;
+          setSyncStatus('ok', isAdmin ? 'Lista carregada ✓' : 'Visualizando lista ✓');
+        } else {
+          guards = defaultGuards.map((name, i) => ({ id: i, name }));
+          if (isAdmin) await salvarNoFirebase();
+          setSyncStatus('ok', 'Lista inicial carregada ✓');
+        }
+        renderList();
+      } catch (e) {
+        setSyncStatus('error', 'Erro ao conectar');
+        guards = defaultGuards.map((name, i) => ({ id: i, name }));
+        renderList();
+        console.error(e);
+      }
+    }
+
+    // ---- TOAST ----
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    // ---- MOVER PARA O FIM ----
+    function askConfirm(guardId) {
+      if (!isAdmin) return;
+      const guard = guards.find(g => g.id === guardId);
+      if (!guard) return;
+      pendingGuardId = guardId;
+      document.getElementById('confirm-msg').textContent = 'Deseja mover "' + guard.name + '" para o final da escala?';
+      document.getElementById('confirm-ok-btn').onclick = () => {
+        const id = pendingGuardId;
+        closeConfirm();
+        moveToEnd(id);
+      };
+      document.getElementById('confirm-overlay').classList.add('open');
+    }
+
+    function closeConfirm() {
+      document.getElementById('confirm-overlay').classList.remove('open');
+      pendingGuardId = null;
+    }
+
+    async function moveToEnd(guardId) {
+      if (!isAdmin) return;
+      lastSnapshot = guards.map(g => ({ ...g }));
+      const idx = guards.findIndex(g => g.id === guardId);
+      if (idx < 0 || idx === guards.length - 1) return;
+      const [moved] = guards.splice(idx, 1);
+      guards.push(moved);
+      moveCount++;
+      highlightId = guardId;
+      document.getElementById('move-count').textContent = moveCount;
+      document.getElementById('undo-bar').classList.add('visible');
+      document.getElementById('undo-msg').textContent = moved.name + ' foi para a posição ' + guards.length;
+      renderList();
+      showToast(moved.name + ' movido para o final');
+      await salvarNoFirebase();
+      setTimeout(() => { highlightId = null; renderList(); }, 1200);
+    }
+
+    async function undoLast() {
+      if (!isAdmin || !lastSnapshot) return;
+      guards = lastSnapshot;
+      lastSnapshot = null;
+      moveCount = Math.max(0, moveCount - 1);
+      document.getElementById('move-count').textContent = moveCount;
+      document.getElementById('undo-bar').classList.remove('visible');
+      renderList();
+      showToast('Ação desfeita');
+      await salvarNoFirebase();
+    }
+
+    // ---- EDITAR POSIÇÃO ----
+    function openEditPos(guardId) {
+      if (!isAdmin) return;
+      const guard = guards.find(g => g.id === guardId);
+      if (!guard) return;
+      editingGuardId = guardId;
+      const currentPos = guards.indexOf(guard) + 1;
+      document.getElementById('edit-pos-title').textContent = guard.name;
+      document.getElementById('edit-pos-subtitle').textContent = 'Posição atual: ' + currentPos + ' de ' + guards.length + '. Digite a nova posição:';
+      const input = document.getElementById('edit-pos-input');
+      input.value = currentPos;
+      input.max = guards.length;
+      document.getElementById('edit-pos-overlay').classList.add('open');
+      setTimeout(() => { input.focus(); input.select(); }, 100);
+    }
+
+    function closeEditPos() {
+      document.getElementById('edit-pos-overlay').classList.remove('open');
+      editingGuardId = null;
+    }
+
+    async function saveEditPos() {
+      if (!isAdmin) return;
+      const newPos = parseInt(document.getElementById('edit-pos-input').value);
+      if (!newPos || newPos < 1 || newPos > guards.length) {
+        showToast('Posição inválida!');
+        return;
+      }
+      const idx = guards.findIndex(g => g.id === editingGuardId);
+      if (idx < 0) return;
+      lastSnapshot = guards.map(g => ({ ...g }));
+      const [moved] = guards.splice(idx, 1);
+      guards.splice(newPos - 1, 0, moved);
+      moveCount++;
+      highlightId = editingGuardId;
+      document.getElementById('move-count').textContent = moveCount;
+      document.getElementById('undo-bar').classList.add('visible');
+      document.getElementById('undo-msg').textContent = moved.name + ' foi para a posição ' + newPos;
+      closeEditPos();
+      renderList();
+      showToast(moved.name + ' movido para a posição ' + newPos);
+      await salvarNoFirebase();
+      setTimeout(() => { highlightId = null; renderList(); }, 1200);
+    }
+
+    // ---- EXPORTAR ----
+    function openExport() {
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('pt-BR') + ' às ' + now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      document.getElementById('sheet-meta').textContent = 'Gerada em ' + dateStr + ' — ' + guards.length + ' guardas';
+      document.getElementById('export-text').textContent = guards.map((g, i) => (i + 1) + '. ' + g.name).join('\n');
+      document.getElementById('list-overlay').classList.add('open');
+    }
+
+    function closeExport() {
+      document.getElementById('list-overlay').classList.remove('open');
+    }
+
+    function copyList() {
+      const text = document.getElementById('export-text').textContent;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(() => { showToast('Lista copiada!'); closeExport(); });
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = text; document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); document.body.removeChild(ta);
+        showToast('Lista copiada!'); closeExport();
+      }
+    }
+
+    // ---- PDF ----
+    function gerarPDF() {
+      const btn = document.getElementById('btn-pdf');
+      btn.disabled = true; btn.textContent = 'Gerando...';
+      setTimeout(() => {
+        try {
+          const { jsPDF } = window.jspdf;
+          const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+          const pageW = 210, pageH = 297, margin = 14;
+          const colW = (pageW - margin * 2) / 3;
+          const now = new Date();
+          const dateStr = now.toLocaleDateString('pt-BR') + ' - ' + now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+          const drawHeader = () => {
+            doc.setFillColor(24, 95, 165); doc.rect(0, 0, pageW, 22, 'F');
+            doc.setTextColor(230, 241, 251); doc.setFont('helvetica', 'bold'); doc.setFontSize(14);
+            doc.text('Escala de Guardas 2026', margin, 10);
+            doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
+            doc.text('Gerada em ' + dateStr + '   |   Total: ' + guards.length + ' guardas', margin, 17);
+            doc.setTextColor(0, 0, 0);
+          };
+          const drawColHeaders = (y) => {
+            for (let c = 0; c < 3; c++) {
+              const x = margin + c * colW;
+              doc.setFillColor(24, 95, 165); doc.rect(x, y, colW, 6, 'F');
+              doc.setTextColor(230, 241, 251); doc.setFont('helvetica', 'bold'); doc.setFontSize(7);
+              doc.text('Pos.', x + 2, y + 4); doc.text('Nome', x + 12, y + 4);
+            }
+            doc.setTextColor(0, 0, 0);
+          };
+          const rowH = 6.2;
+          const colSize = Math.ceil(guards.length / 3);
+          const cols = [guards.slice(0, colSize), guards.slice(colSize, colSize * 2), guards.slice(colSize * 2)];
+          const numRows = cols[0].length;
+          let page = 1;
+          drawHeader(); let startY = 28; drawColHeaders(startY); let y = startY + 6;
+          for (let row = 0; row < numRows; row++) {
+            if (y + rowH > pageH - 12) {
+              doc.setFontSize(7); doc.setTextColor(136, 135, 128);
+              doc.text('Página ' + page, pageW - margin, pageH - 6, { align: 'right' });
+              doc.addPage(); page++; drawHeader(); startY = 28; drawColHeaders(startY); y = startY + 6;
+            }
+            for (let c = 0; c < 3; c++) {
+              const item = cols[c][row]; if (!item) continue;
+              const globalPos = c * colSize + row + 1;
+              const x = margin + c * colW; const isEven = row % 2 === 1;
+              if (globalPos === 1) doc.setFillColor(250, 199, 117);
+              else if (globalPos === guards.length) doc.setFillColor(211, 209, 199);
+              else doc.setFillColor(isEven ? 241 : 255, isEven ? 239 : 255, isEven ? 232 : 255);
+              doc.rect(x, y, colW, rowH, 'F');
+              doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(24, 95, 165);
+              doc.text(String(globalPos), x + 3, y + 4.2);
+              doc.setFont('helvetica', 'normal'); doc.setTextColor(44, 44, 42);
+              const name = item.name.length > 18 ? item.name.substring(0, 17) + '.' : item.name;
+              doc.text(name, x + 12, y + 4.2);
+              doc.setDrawColor(211, 209, 199); doc.setLineWidth(0.1);
+              doc.line(x, y + rowH, x + colW, y + rowH);
+            }
+            y += rowH;
+          }
+          doc.setFontSize(7); doc.setTextColor(136, 135, 128);
+          doc.text('Página ' + page, pageW - margin, pageH - 6, { align: 'right' });
+          doc.save('Lista_Prioridade_2026.pdf');
+          showToast('PDF baixado com sucesso!');
+        } catch (e) { showToast('Erro ao gerar PDF.'); console.error(e); }
+        btn.disabled = false; btn.textContent = '⬇ Baixar PDF';
+      }, 50);
+    }
+
+    // ---- RENDER ----
+    function renderList() {
+      const query = document.getElementById('search').value.toLowerCase().trim();
+      const filtered = query ? guards.filter(g => g.name.toLowerCase().includes(query)) : guards;
+      document.getElementById('total-count').textContent = guards.length;
+      const container = document.getElementById('guard-list');
+      if (filtered.length === 0) { container.innerHTML = '<div class="empty">Nenhum guarda encontrado</div>'; return; }
+      container.innerHTML = filtered.map(g => {
+        const pos = guards.indexOf(g) + 1;
+        const isFirst = pos === 1, isLast = pos === guards.length;
+        const isHighlight = g.id === highlightId;
+        const badgeClass = isFirst ? 'first' : (isLast ? 'last' : '');
+        const actions = isAdmin
+          ? `<div class="guard-actions">
+           <button class="btn-edit-pos" title="Editar posição" onclick="event.stopPropagation(); window._openEditPos(${g.id})">✎</button>
+           <button class="btn-move${isLast ? '' : ' danger'}" onclick="event.stopPropagation(); window._askConfirm(${g.id})">${isLast ? 'Fim' : 'Ir pro fim'}</button>
+         </div>`
+          : '';
+        return `<div class="guard-item${isAdmin ? ' editable' : ''}${isHighlight ? ' highlight' : ''}" ${isAdmin ? `onclick="window._askConfirm(${g.id})"` : ''}>
+      <div class="pos-badge ${badgeClass}">${pos}</div>
+      <div class="guard-name">${g.name}</div>
+      ${actions}
+    </div>`;
+      }).join('');
+    }
+
+    // Expor ao escopo global
+    window._askConfirm = askConfirm;
+    window._closeConfirm = closeConfirm;
+    window._undoLast = undoLast;
+    window._openEditPos = openEditPos;
+    window._closeEditPos = closeEditPos;
+    window._saveEditPos = saveEditPos;
+    window._openExport = openExport;
+    window._closeExport = closeExport;
+    window._copyList = copyList;
+    window._gerarPDF = gerarPDF;
+    window._renderList = renderList;
+
+    // Iniciar na tela de login
+    showLogin();
+  </script>
+</body>
+
+</html>
