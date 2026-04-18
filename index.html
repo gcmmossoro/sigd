@@ -729,6 +729,54 @@
       border-bottom: 1px solid #f0f0f0;
     }
 
+
+    .btn-diarias {
+      width: 100%;
+      padding: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      background: #1D9E75;
+      color: white;
+      cursor: pointer;
+      margin-bottom: 8px;
+    }
+    .btn-secondary { padding:11px 20px; font-size:13px; border:1.5px solid #e0e0e0; border-radius:10px; background:white; color:#555; cursor:pointer; }
+    .btn-primary { padding:11px 20px; font-size:13px; font-weight:600; border:none; border-radius:10px; background:#185FA5; color:white; cursor:pointer; }
+    .btn-diarias:active { background: #085041; }
+    .form-label-sm { font-size:12px; color:#888; display:block; margin-bottom:4px; }
+
+    /* Diarias Modal */
+    .diarias-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:300; align-items:flex-end; justify-content:center; }
+    .diarias-overlay.open { display:flex; }
+    .diarias-sheet { background:white; border-radius:20px 20px 0 0; width:100%; max-width:540px; max-height:92vh; display:flex; flex-direction:column; }
+    .diarias-header { padding:1rem 1.25rem; border-bottom:1px solid #f0f0f0; display:flex; align-items:center; justify-content:space-between; }
+    .diarias-header h3 { font-size:16px; font-weight:600; }
+    .diarias-body { padding:1rem 1.25rem; overflow-y:auto; flex:1; }
+    .diarias-footer { padding:0.75rem 1.25rem 1.5rem; display:flex; gap:8px; border-top:1px solid #f0f0f0; }
+
+    .guard-select-list { max-height:260px; overflow-y:auto; border:1.5px solid #e0e0e0; border-radius:10px; margin-bottom:12px; }
+    .guard-select-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border-bottom:1px solid #f5f5f5; cursor:pointer; }
+    .guard-select-item:last-child { border-bottom:none; }
+    .guard-select-item:hover { background:#f9f9f9; }
+    .guard-select-item input[type=checkbox] { width:18px; height:18px; accent-color:#185FA5; flex-shrink:0; cursor:pointer; }
+    .guard-select-pos { font-size:11px; font-weight:700; color:#185FA5; min-width:28px; }
+    .guard-select-name { font-size:14px; flex:1; }
+    .guard-select-check { display:flex; gap:8px; margin-bottom:8px; }
+    .guard-select-check button { flex:1; padding:7px; font-size:12px; border:1.5px solid #e0e0e0; border-radius:8px; background:white; cursor:pointer; }
+
+    .dist-info { background:#E6F1FB; border-radius:10px; padding:10px 14px; font-size:13px; color:#185FA5; margin-bottom:12px; line-height:1.5; }
+    .dist-result { background:#f8f8f8; border-radius:10px; padding:1rem; font-family:'Courier New',monospace; font-size:13px; line-height:1.8; white-space:pre-wrap; margin-top:12px; border:1.5px solid #e0e0e0; }
+    .num-diarias-wrap { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+    .num-diarias-wrap label { font-size:13px; color:#555; white-space:nowrap; }
+    .num-diarias-wrap input { width:80px; padding:8px 12px; border:1.5px solid #e0e0e0; border-radius:8px; font-size:16px; font-weight:700; text-align:center; color:#185FA5; outline:none; }
+    .num-diarias-wrap input:focus { border-color:#185FA5; }
+    .local-diaria-wrap { margin-bottom:12px; }
+    .local-diaria-wrap label { font-size:13px; color:#555; display:block; margin-bottom:4px; }
+    .local-diaria-wrap input { width:100%; padding:9px 12px; border:1.5px solid #e0e0e0; border-radius:8px; font-size:14px; outline:none; }
+    .local-diaria-wrap input:focus { border-color:#185FA5; }
+
     .toast {
       position: fixed;
       bottom: 2rem;
@@ -837,8 +885,9 @@
 
       <div class="btn-row">
         <button class="btn-ver" onclick="window._openExport()">Ver lista</button>
-        <button class="btn-pdf" id="btn-pdf" onclick="window._gerarPDF()">⬇ Baixar PDF</button>
+        <button class="btn-pdf" id="btn-pdf" onclick="window._gerarPDF()">⬇ PDF</button>
       </div>
+      <button class="btn-diarias" id="btn-diarias" style="display:none" onclick="window._openDiarias()">📋 Distribuir Diárias GCM</button>
 
       <div class="search-wrap">
         <input type="text" id="search" placeholder="Buscar guarda pelo nome..." oninput="window._renderList()" />
@@ -901,6 +950,69 @@
       <div class="sheet-footer">
         <button class="btn-copy" onclick="window._copyList()">Copiar lista</button>
         <button class="btn-close-sheet" onclick="window._closeExport()">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- MODAL DISTRIBUIR DIÁRIAS -->
+  <div class="diarias-overlay" id="diarias-overlay">
+    <div class="diarias-sheet">
+      <div class="diarias-header">
+        <h3>Distribuir Diárias GCM</h3>
+        <button class="sheet-close" onclick="window._closeDiarias()">✕</button>
+      </div>
+      <div class="diarias-body">
+        <div class="dist-info">Selecione os guardas disponíveis. O sistema distribui automaticamente pela ordem de prioridade da lista.</div>
+
+        <div class="local-diaria-wrap">
+          <label>Local / Posto</label>
+          <input type="text" id="inp-local-diaria" placeholder="Ex: UPA DO ALTO, CENTRO ADM...">
+        </div>
+
+        <div style="display:flex;gap:8px;margin-bottom:12px;">
+          <div style="flex:1;">
+            <label class="form-label-sm">Data</label>
+            <input type="date" id="inp-data-diaria" style="width:100%;padding:9px 12px;border:1.5px solid #e0e0e0;border-radius:8px;font-size:14px;outline:none;color:#1a1a1a;">
+          </div>
+          <div style="flex:1;">
+            <label class="form-label-sm">Período</label>
+            <select id="inp-periodo-diaria" style="width:100%;padding:9px 12px;border:1.5px solid #e0e0e0;border-radius:8px;font-size:14px;outline:none;color:#1a1a1a;background:white;">
+              <option value="DIURNA">☀ Diurna</option>
+              <option value="NOTURNA">🌙 Noturna</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="num-diarias-wrap">
+          <label>Quantidade de vagas:</label>
+          <input type="number" id="inp-num-diarias" value="1" min="1" max="20">
+        </div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <span style="font-size:13px;font-weight:600;color:#333;">Disponibilidades</span>
+          <div class="guard-select-check">
+            <button onclick="window._selectAll()">Todos</button>
+            <button onclick="window._selectNone()">Nenhum</button>
+          </div>
+        </div>
+
+        <div style="position:relative;margin-bottom:8px;">
+          <input type="text" id="search-disp" placeholder="🔍 Buscar guarda..." oninput="window._filterGuardSelect()"
+            style="width:100%;padding:9px 12px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:14px;outline:none;">
+        </div>
+
+        <div class="guard-select-list" id="guard-select-list"></div>
+
+        <div id="dist-result-wrap" style="display:none;">
+          <div style="font-size:13px;font-weight:600;color:#333;margin-bottom:6px;">Resultado da distribuição:</div>
+          <div class="dist-result" id="dist-result-text"></div>
+        </div>
+      </div>
+      <div class="diarias-footer">
+        <button class="btn-secondary" style="flex:1" onclick="window._closeDiarias()">Fechar</button>
+        <button class="btn-primary" style="flex:1" onclick="window._distribuirDiarias()">Distribuir</button>
+        <button class="btn-copy" style="flex:1;display:none" id="btn-copy-dist" onclick="window._copyDist()">Copiar</button>
       </div>
     </div>
   </div>
@@ -1007,6 +1119,7 @@
       document.getElementById('btn-logout').style.display = isAdmin ? 'block' : 'none';
       document.getElementById('btn-login-header').style.display = isGuest ? 'block' : 'none';
       document.getElementById('readonly-notice').style.display = isGuest ? 'block' : 'none';
+      document.getElementById('btn-diarias').style.display = isAdmin ? 'block' : 'none';
       document.getElementById('undo-bar').classList.remove('visible');
       carregarDoFirebase();
     }
@@ -1292,9 +1405,126 @@
     window._gerarPDF = gerarPDF;
     window._renderList = renderList;
 
+
+    // ---- DISTRIBUIR DIÁRIAS ----
+    function openDiarias() {
+      renderGuardSelectList();
+      document.getElementById('dist-result-wrap').style.display = 'none';
+      document.getElementById('btn-copy-dist').style.display = 'none';
+      document.getElementById('diarias-overlay').classList.add('open');
+    }
+
+    function closeDiarias() {
+      document.getElementById('diarias-overlay').classList.remove('open');
+    }
+
+    function renderGuardSelectList() {
+      const c = document.getElementById('guard-select-list');
+      c.innerHTML = guards.map((g, idx) => {
+        const pos = idx + 1;
+        return `<label class="guard-select-item">
+          <input type="checkbox" class="guard-disp-check" value="${g.id}">
+          <span class="guard-select-pos">${pos}º</span>
+          <span class="guard-select-name">${g.name}</span>
+        </label>`;
+      }).join('');
+    }
+
+    function selectAll() {
+      document.querySelectorAll('.guard-disp-check').forEach(el => el.checked = true);
+    }
+
+    function selectNone() {
+      document.querySelectorAll('.guard-disp-check').forEach(el => el.checked = false);
+    }
+
+    function distribuirDiarias() {
+      const local = document.getElementById('inp-local-diaria').value.trim();
+      const numDiarias = parseInt(document.getElementById('inp-num-diarias').value) || 1;
+
+      // Pega guardas selecionados na ordem da lista de prioridade
+      const selecionados = [];
+      document.querySelectorAll('.guard-disp-check:checked').forEach(el => {
+        const g = guards.find(g => g.id === parseInt(el.value));
+        if (g) selecionados.push(g);
+      });
+
+      if (!selecionados.length) { showToast('Selecione ao menos um guarda.'); return; }
+
+      // Distribui pela ordem de prioridade
+      const contemplados = selecionados.slice(0, numDiarias);
+      const naoContemplados = selecionados.slice(numDiarias);
+
+      const dataInput = document.getElementById('inp-data-diaria').value;
+      const periodo = document.getElementById('inp-periodo-diaria').value;
+      var dataStr = '';
+      if (dataInput) {
+        var parts = dataInput.split('-');
+        dataStr = parts[2] + '/' + parts[1] + '/' + parts[0];
+      }
+
+      const linhas = [];
+      linhas.push('*SISTEMA DE GESTÃO DE DIÁRIAS - SIGD*');
+      linhas.push('');
+      if (local) linhas.push('📍 *Local:* ' + local.toUpperCase());
+      if (dataStr) linhas.push('📅 *Data:* ' + dataStr);
+      linhas.push('🕐 *Período:* ' + periodo);
+      linhas.push('🎫 *Vagas:* ' + numDiarias);
+      linhas.push('');
+      linhas.push('Escalados:');
+      contemplados.forEach(function(g, i) {
+        var posReal = guards.indexOf(g) + 1;
+        linhas.push('- ' + g.name + ' (' + posReal + 'º)');
+      });
+
+      if (naoContemplados.length) {
+        linhas.push('');
+        linhas.push('');
+        linhas.push('Disponibilidades:');
+        naoContemplados.forEach(function(g, i) {
+          var posReal = guards.indexOf(g) + 1;
+          linhas.push('- ' + g.name + ' (' + posReal + 'º)');
+        });
+      }
+
+      linhas.push('');
+      
+      var texto = linhas.join('\n');
+
+      document.getElementById('dist-result-text').textContent = texto;
+      document.getElementById('dist-result-wrap').style.display = 'block';
+      document.getElementById('btn-copy-dist').style.display = 'block';
+    }
+
+    function copyDist() {
+      var text = document.getElementById('dist-result-text').textContent;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(function() { showToast('Copiado! Cole no grupo 📲'); });
+      } else {
+        var ta = document.createElement('textarea');
+        ta.value = text; document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); document.body.removeChild(ta);
+        showToast('Copiado! Cole no grupo 📲');
+      }
+    }
+
+    function filterGuardSelect() {
+      var q = (document.getElementById('search-disp').value || '').toLowerCase();
+      document.querySelectorAll('.guard-select-item').forEach(function(el) {
+        var name = el.querySelector('.guard-select-name').textContent.toLowerCase();
+        el.style.display = name.includes(q) ? '' : 'none';
+      });
+    }
+    window._filterGuardSelect = filterGuardSelect;
+
+        window._openDiarias = openDiarias;
+    window._closeDiarias = closeDiarias;
+    window._selectAll = selectAll;
+    window._selectNone = selectNone;
+    window._distribuirDiarias = distribuirDiarias;
+    window._copyDist = copyDist;
     // Iniciar na tela de login
     showLogin();
   </script>
 </body>
-
 </html>
