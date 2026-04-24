@@ -811,6 +811,24 @@
       margin-bottom: 12px;
       text-align: center;
     }
+
+    .mover-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.55); z-index: 400;
+      align-items: center; justify-content: center; padding: 1rem;
+    }
+    .mover-overlay.open { display: flex; }
+    .mover-box { background: white; border-radius: 16px; width: 100%; max-width: 360px; padding: 1.5rem; }
+    .mover-box h3 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+    .mover-subtitle { font-size: 13px; color: #888; margin-bottom: 12px; line-height: 1.5; }
+    .mover-names {
+      background: #f5f8fc; border: 1.5px solid #d0e3f5; border-radius: 10px;
+      padding: 10px 12px; font-size: 13px; color: #185FA5;
+      margin-bottom: 1.25rem; line-height: 1.8; white-space: pre-line;
+    }
+    .mover-btns { display: flex; gap: 8px; }
+    .btn-mover-sim { flex:1; padding:12px; font-size:14px; font-weight:600; border:none; border-radius:10px; background:#1D9E75; color:white; cursor:pointer; }
+    .btn-mover-nao { flex:1; padding:12px; font-size:14px; border:1.5px solid #e0e0e0; border-radius:10px; background:transparent; color:#666; cursor:pointer; }
   </style>
 </head>
 
@@ -1017,6 +1035,18 @@
     </div>
   </div>
 
+  <div class="mover-overlay" id="mover-overlay">
+    <div class="mover-box">
+      <h3>Mover escalados ao fim?</h3>
+      <p class="mover-subtitle">Deseja mover os guardas escalados para o final da lista de prioridade?</p>
+      <div class="mover-names" id="mover-names"></div>
+      <div class="mover-btns">
+        <button class="btn-mover-nao" onclick="window._fecharMover()">Não</button>
+        <button class="btn-mover-sim" onclick="window._confirmarMover()">Sim, mover</button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
   <script type="module">
@@ -1034,7 +1064,7 @@
       measurementId: "G-Y1PFFDDB9S"
     };
 
-    const AUTHORIZED_EMAIL = "saviolucasss@gmail.com";
+    const AUTHORIZED_EMAILS = ["saviolucasss@gmail.com", "katianeferreira1986@gmail.com"];
 
     const firebaseApp = initializeApp(firebaseConfig);
     const db = getFirestore(firebaseApp);
@@ -1064,13 +1094,14 @@
     let highlightId = null;
     let pendingGuardId = null;
     let editingGuardId = null;
+    let pendingMoverIds = [];
     let isAdmin = false;
     let isGuest = false;
 
     // ---- AUTH ----
     onAuthStateChanged(auth, user => {
       if (user) {
-        if (user.email === AUTHORIZED_EMAIL) {
+        if (AUTHORIZED_EMAILS.includes(user.email)) {
           isAdmin = true; isGuest = false;
           showApp(user.displayName || user.email);
         } else {
@@ -1494,6 +1525,13 @@
       document.getElementById('dist-result-text').textContent = texto;
       document.getElementById('dist-result-wrap').style.display = 'block';
       document.getElementById('btn-copy-dist').style.display = 'block';
+
+      if (isAdmin && contemplados.length) {
+        pendingMoverIds = contemplados.map(g => g.id);
+        document.getElementById('mover-names').textContent =
+          contemplados.map((g, i) => (i + 1) + '. ' + g.name).join('\n');
+        document.getElementById('mover-overlay').classList.add('open');
+      }
     }
 
     function copyDist() {
@@ -1523,6 +1561,38 @@
     window._selectNone = selectNone;
     window._distribuirDiarias = distribuirDiarias;
     window._copyDist = copyDist;
+
+    function fecharMover() {
+      document.getElementById('mover-overlay').classList.remove('open');
+      pendingMoverIds = [];
+    }
+
+    async function confirmarMover() {
+      if (!pendingMoverIds.length) return;
+      const idsParaMover = [...pendingMoverIds];
+      fecharMover();
+      lastSnapshot = guards.map(g => ({ ...g }));
+      for (const id of idsParaMover) {
+        const idx = guards.findIndex(g => g.id === id);
+        if (idx < 0 || idx === guards.length - 1) continue;
+        const [moved] = guards.splice(idx, 1);
+        guards.push(moved);
+        moveCount++;
+      }
+      document.getElementById('move-count').textContent = moveCount;
+      document.getElementById('undo-bar').classList.add('visible');
+      document.getElementById('undo-msg').textContent =
+        idsParaMover.length === 1
+          ? guards[guards.length - 1].name + ' foi para o fim'
+          : idsParaMover.length + ' guardas movidos para o fim';
+      renderList();
+      showToast('Escalados movidos para o fim ✓');
+      await salvarNoFirebase();
+    }
+
+    window._fecharMover = fecharMover;
+    window._confirmarMover = confirmarMover;
+
     // Iniciar na tela de login
     showLogin();
   </script>
