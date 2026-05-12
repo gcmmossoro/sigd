@@ -829,6 +829,28 @@
     .mover-btns { display: flex; gap: 8px; }
     .btn-mover-sim { flex:1; padding:12px; font-size:14px; font-weight:600; border:none; border-radius:10px; background:#1D9E75; color:white; cursor:pointer; }
     .btn-mover-nao { flex:1; padding:12px; font-size:14px; border:1.5px solid #e0e0e0; border-radius:10px; background:transparent; color:#666; cursor:pointer; }
+
+    /* HISTÓRICO */
+    .hist-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:300; align-items:flex-end; justify-content:center; }
+    .hist-overlay.open { display:flex; }
+    .hist-sheet { background:white; border-radius:20px 20px 0 0; width:100%; max-width:540px; max-height:90vh; display:flex; flex-direction:column; }
+    .hist-header { padding:1rem 1.25rem; border-bottom:1px solid #f0f0f0; display:flex; align-items:center; justify-content:space-between; }
+    .hist-header h3 { font-size:16px; font-weight:600; }
+    .hist-body { overflow-y:auto; flex:1; }
+    .hist-empty { text-align:center; padding:3rem 1rem; color:#aaa; font-size:14px; }
+    .hist-item { display:flex; align-items:flex-start; gap:10px; padding:12px 1.25rem; border-bottom:1px solid #f5f5f5; }
+    .hist-item:last-child { border-bottom:none; }
+    .hist-icon { width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; margin-top:1px; }
+    .hist-icon.fim { background:#FEF0E0; }
+    .hist-icon.pos { background:#E6F1FB; }
+    .hist-icon.dist { background:#E6F8F3; }
+    .hist-icon.undo { background:#F5F0FF; }
+    .hist-info { flex:1; }
+    .hist-title { font-size:14px; font-weight:500; color:#1a1a1a; line-height:1.4; }
+    .hist-time { font-size:11px; color:#aaa; margin-top:2px; }
+    .hist-footer { padding:0.75rem 1.25rem 1.5rem; }
+    .btn-hist { width:100%; padding:13px; font-size:14px; border:1.5px solid #e0e0e0; border-radius:12px; background:transparent; color:#666; cursor:pointer; }
+    .btn-hist-admin { width:100%; padding:11px; font-size:13px; font-weight:500; border:none; border-radius:10px; background:transparent; color:#185FA5; border:1.5px solid #185FA5; cursor:pointer; margin-bottom:8px; display:none; }
   </style>
 </head>
 
@@ -906,6 +928,7 @@
         <button class="btn-pdf" id="btn-pdf" onclick="window._gerarPDF()">⬇ PDF</button>
       </div>
       <button class="btn-diarias" id="btn-diarias" style="display:none" onclick="window._openDiarias()">📋 Distribuir Diárias GCM</button>
+      <button class="btn-hist-admin" id="btn-historico" onclick="window._openHistorico()">🕒 Ver Histórico de Movimentações</button>
 
       <div class="search-wrap">
         <input type="text" id="search" placeholder="Buscar guarda pelo nome..." oninput="window._renderList()" />
@@ -1047,11 +1070,27 @@
     </div>
   </div>
 
+  <!-- MODAL HISTÓRICO -->
+  <div class="hist-overlay" id="hist-overlay">
+    <div class="hist-sheet">
+      <div class="hist-header">
+        <h3>🕒 Histórico de Movimentações</h3>
+        <button class="sheet-close" onclick="window._closeHistorico()">✕</button>
+      </div>
+      <div class="hist-body" id="hist-body">
+        <div class="hist-empty">Carregando histórico...</div>
+      </div>
+      <div class="hist-footer">
+        <button class="btn-hist" onclick="window._closeHistorico()">Fechar</button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -1151,6 +1190,7 @@
       document.getElementById('btn-login-header').style.display = isGuest ? 'block' : 'none';
       document.getElementById('readonly-notice').style.display = isGuest ? 'block' : 'none';
       document.getElementById('btn-diarias').style.display = isAdmin ? 'block' : 'none';
+      document.getElementById('btn-historico').style.display = isAdmin ? 'block' : 'none';
       document.getElementById('undo-bar').classList.remove('visible');
       carregarDoFirebase();
     }
@@ -1161,15 +1201,29 @@
       document.getElementById('sync-msg').textContent = msg;
     }
 
-    async function salvarNoFirebase() {
+    function criarEntradaHistorico(tipo, descricao) {
+      return {
+        tipo,          // 'fim' | 'pos' | 'dist' | 'undo'
+        descricao,
+        timestamp: new Date().toISOString(),
+        admin: auth.currentUser ? (auth.currentUser.displayName || auth.currentUser.email) : 'Admin'
+      };
+    }
+
+    async function salvarNoFirebase(entradaHistorico = null) {
       if (!isAdmin) return;
       setSyncStatus('saving', 'Salvando...');
       try {
-        await setDoc(doc(db, 'escala', 'guardas'), {
+        const docRef = doc(db, 'escala', 'guardas');
+        const payload = {
           ordem: guards.map(g => g.name),
           movimentacoes: moveCount,
           atualizado: new Date().toISOString()
-        });
+        };
+        await setDoc(docRef, payload, { merge: true });
+        if (entradaHistorico) {
+          await updateDoc(docRef, { historico: arrayUnion(entradaHistorico) });
+        }
         setSyncStatus('ok', 'Salvo no banco ✓');
       } catch (e) {
         setSyncStatus('error', 'Erro ao salvar');
@@ -1243,7 +1297,8 @@
       document.getElementById('undo-msg').textContent = moved.name + ' foi para a posição ' + guards.length;
       renderList();
       showToast(moved.name + ' movido para o final');
-      await salvarNoFirebase();
+      const hist = criarEntradaHistorico('fim', moved.name + ' movido para o fim da lista (era ' + (idx + 1) + 'º)');
+      await salvarNoFirebase(hist);
       setTimeout(() => { highlightId = null; renderList(); }, 1200);
     }
 
@@ -1256,7 +1311,8 @@
       document.getElementById('undo-bar').classList.remove('visible');
       renderList();
       showToast('Ação desfeita');
-      await salvarNoFirebase();
+      const hist = criarEntradaHistorico('undo', 'Última movimentação desfeita');
+      await salvarNoFirebase(hist);
     }
 
     // ---- EDITAR POSIÇÃO ----
@@ -1300,7 +1356,8 @@
       closeEditPos();
       renderList();
       showToast(moved.name + ' movido para a posição ' + newPos);
-      await salvarNoFirebase();
+      const hist = criarEntradaHistorico('pos', moved.name + ' reposicionado de ' + (idx + 1) + 'º para ' + newPos + 'º');
+      await salvarNoFirebase(hist);
       setTimeout(() => { highlightId = null; renderList(); }, 1200);
     }
 
@@ -1396,6 +1453,47 @@
         btn.disabled = false; btn.textContent = '⬇ Baixar PDF';
       }, 50);
     }
+
+    // ---- HISTÓRICO ----
+    async function openHistorico() {
+      document.getElementById('hist-overlay').classList.add('open');
+      const body = document.getElementById('hist-body');
+      body.innerHTML = '<div class="hist-empty">Carregando...</div>';
+      try {
+        const snap = await getDoc(doc(db, 'escala', 'guardas'));
+        const historico = snap.exists() && snap.data().historico ? snap.data().historico : [];
+        if (!historico.length) {
+          body.innerHTML = '<div class="hist-empty">Nenhuma movimentação registrada ainda.</div>';
+          return;
+        }
+        const iconMap = { fim: '⬇', pos: '✎', dist: '📋', undo: '↩' };
+        const classMap = { fim: 'fim', pos: 'pos', dist: 'dist', undo: 'undo' };
+        const sorted = [...historico].reverse();
+        body.innerHTML = sorted.map(h => {
+          const dt = new Date(h.timestamp);
+          const dataStr = dt.toLocaleDateString('pt-BR') + ' às ' + dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+          const icon = iconMap[h.tipo] || '•';
+          const cls = classMap[h.tipo] || '';
+          return `<div class="hist-item">
+            <div class="hist-icon ${cls}">${icon}</div>
+            <div class="hist-info">
+              <div class="hist-title">${h.descricao}</div>
+              <div class="hist-time">${dataStr}${h.admin ? ' · ' + h.admin : ''}</div>
+            </div>
+          </div>`;
+        }).join('');
+      } catch (e) {
+        body.innerHTML = '<div class="hist-empty">Erro ao carregar histórico.</div>';
+        console.error(e);
+      }
+    }
+
+    function closeHistorico() {
+      document.getElementById('hist-overlay').classList.remove('open');
+    }
+
+    window._openHistorico = openHistorico;
+    window._closeHistorico = closeHistorico;
 
     // ---- RENDER ----
     function renderList() {
@@ -1587,7 +1685,9 @@
           : idsParaMover.length + ' guardas movidos para o fim';
       renderList();
       showToast('Escalados movidos para o fim ✓');
-      await salvarNoFirebase();
+      const nomes = idsParaMover.map(id => guards.find(g => g.id === id)?.name || '?').join(', ');
+      const hist = criarEntradaHistorico('dist', 'Distribuição de diárias: ' + nomes + ' movidos ao fim');
+      await salvarNoFirebase(hist);
     }
 
     window._fecharMover = fecharMover;
