@@ -830,6 +830,28 @@
     .btn-mover-sim { flex:1; padding:12px; font-size:14px; font-weight:600; border:none; border-radius:10px; background:#1D9E75; color:white; cursor:pointer; }
     .btn-mover-nao { flex:1; padding:12px; font-size:14px; border:1.5px solid #e0e0e0; border-radius:10px; background:transparent; color:#666; cursor:pointer; }
 
+    /* GERENCIAR GCMs */
+    .gcm-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:300; align-items:flex-end; justify-content:center; }
+    .gcm-overlay.open { display:flex; }
+    .gcm-sheet { background:white; border-radius:20px 20px 0 0; width:100%; max-width:540px; max-height:90vh; display:flex; flex-direction:column; }
+    .gcm-header { padding:1rem 1.25rem; border-bottom:1px solid #f0f0f0; display:flex; align-items:center; justify-content:space-between; }
+    .gcm-header h3 { font-size:16px; font-weight:600; }
+    .gcm-body { overflow-y:auto; flex:1; padding:1rem 1.25rem; }
+    .gcm-field { margin-bottom:14px; }
+    .gcm-field label { display:block; font-size:12px; color:#888; margin-bottom:5px; }
+    .gcm-field input, .gcm-field select { width:100%; padding:11px 13px; border:1.5px solid #e0e0e0; border-radius:10px; font-size:14px; outline:none; color:#1a1a1a; background:white; }
+    .gcm-field input:focus, .gcm-field select:focus { border-color:#185FA5; }
+    .btn-add-gcm { width:100%; padding:13px; font-size:14px; font-weight:600; border:none; border-radius:12px; background:#185FA5; color:white; cursor:pointer; margin-top:4px; }
+    .btn-add-gcm:disabled { opacity:0.5; cursor:default; }
+    .del-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:500; align-items:center; justify-content:center; padding:1rem; }
+    .del-overlay.open { display:flex; }
+    .del-box { background:white; border-radius:16px; width:100%; max-width:320px; padding:1.5rem; text-align:center; }
+    .del-box h3 { font-size:16px; font-weight:600; margin-bottom:8px; }
+    .del-box p { font-size:14px; color:#555; margin-bottom:1.25rem; line-height:1.5; }
+    .del-btns { display:flex; gap:8px; }
+    .btn-del-confirm { flex:1; padding:12px; font-size:14px; font-weight:600; border:none; border-radius:10px; background:#E24B4A; color:white; cursor:pointer; }
+    .btn-del-cancel { flex:1; padding:12px; font-size:14px; border:1.5px solid #e0e0e0; border-radius:10px; background:transparent; color:#666; cursor:pointer; }
+
     /* HISTÓRICO */
     .hist-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:300; align-items:flex-end; justify-content:center; }
     .hist-overlay.open { display:flex; }
@@ -928,6 +950,7 @@
         <button class="btn-pdf" id="btn-pdf" onclick="window._gerarPDF()">⬇ PDF</button>
       </div>
       <button class="btn-diarias" id="btn-diarias" style="display:none" onclick="window._openDiarias()">📋 Distribuir Diárias GCM</button>
+      <button class="btn-hist-admin" id="btn-gerenciar" onclick="window._openGerenciar()" style="background:#185FA5;color:white;border:none;display:none;">👤 Adicionar GCM</button>
       <button class="btn-hist-admin" id="btn-historico" onclick="window._openHistorico()">🕒 Ver Histórico de Movimentações</button>
 
       <div class="search-wrap">
@@ -1071,6 +1094,47 @@
   </div>
 
   <!-- MODAL HISTÓRICO -->
+  <!-- MODAL ADICIONAR GCM -->
+  <div class="gcm-overlay" id="gcm-overlay">
+    <div class="gcm-sheet">
+      <div class="gcm-header">
+        <h3>👤 Adicionar GCM</h3>
+        <button class="sheet-close" onclick="window._closeGerenciar()">✕</button>
+      </div>
+      <div class="gcm-body">
+        <div class="gcm-field">
+          <label>Nome do GCM</label>
+          <input type="text" id="gcm-add-nome" placeholder="Ex: João Silva" oninput="window._gcmAddNomeInput()" />
+        </div>
+        <div class="gcm-field">
+          <label>Inserir na posição</label>
+          <select id="gcm-add-pos">
+            <option value="fim">Fim da lista (última prioridade)</option>
+            <option value="inicio">Início da lista (primeira prioridade)</option>
+            <option value="especifica">Posição específica...</option>
+          </select>
+        </div>
+        <div class="gcm-field" id="gcm-pos-especifica-wrap" style="display:none;">
+          <label>Número da posição</label>
+          <input type="number" id="gcm-add-pos-num" min="1" placeholder="Ex: 5" />
+        </div>
+        <button class="btn-add-gcm" id="btn-add-gcm-confirm" onclick="window._confirmarAddGcm()" disabled>Adicionar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CONFIRMAR REMOÇÃO -->
+  <div class="del-overlay" id="del-overlay">
+    <div class="del-box">
+      <h3>Remover GCM</h3>
+      <p id="del-msg"></p>
+      <div class="del-btns">
+        <button class="btn-del-cancel" onclick="window._cancelDel()">Cancelar</button>
+        <button class="btn-del-confirm" onclick="window._confirmarDel()">Remover</button>
+      </div>
+    </div>
+  </div>
+
   <div class="hist-overlay" id="hist-overlay">
     <div class="hist-sheet">
       <div class="hist-header">
@@ -1190,6 +1254,7 @@
       document.getElementById('btn-login-header').style.display = isGuest ? 'block' : 'none';
       document.getElementById('readonly-notice').style.display = isGuest ? 'block' : 'none';
       document.getElementById('btn-diarias').style.display = isAdmin ? 'block' : 'none';
+      document.getElementById('btn-gerenciar').style.display = isAdmin ? 'block' : 'none';
       document.getElementById('btn-historico').style.display = isAdmin ? 'block' : 'none';
       document.getElementById('undo-bar').classList.remove('visible');
       carregarDoFirebase();
@@ -1454,6 +1519,96 @@
       }, 50);
     }
 
+    // ---- GERENCIAR GCMs ----
+    let pendingDelId = null;
+
+    function openGerenciar() {
+      document.getElementById('gcm-add-nome').value = '';
+      document.getElementById('gcm-add-pos').value = 'fim';
+      document.getElementById('gcm-pos-especifica-wrap').style.display = 'none';
+      document.getElementById('btn-add-gcm-confirm').disabled = true;
+      document.getElementById('gcm-overlay').classList.add('open');
+    }
+
+    function closeGerenciar() {
+      document.getElementById('gcm-overlay').classList.remove('open');
+    }
+
+    function gcmAddNomeInput() {
+      const val = document.getElementById('gcm-add-nome').value.trim();
+      document.getElementById('btn-add-gcm-confirm').disabled = val.length < 2;
+    }
+
+    document.getElementById('gcm-add-pos').addEventListener('change', function () {
+      document.getElementById('gcm-pos-especifica-wrap').style.display = this.value === 'especifica' ? 'block' : 'none';
+    });
+
+    async function confirmarAddGcm() {
+      const nome = document.getElementById('gcm-add-nome').value.trim();
+      if (nome.length < 2) return;
+      const posOpcao = document.getElementById('gcm-add-pos').value;
+      const novoGuard = { id: Date.now(), name: nome };
+      lastSnapshot = guards.map(g => ({ ...g }));
+      let posInserida;
+      if (posOpcao === 'fim') {
+        guards.push(novoGuard);
+        posInserida = guards.length;
+      } else if (posOpcao === 'inicio') {
+        guards.unshift(novoGuard);
+        guards = guards.map((g, i) => ({ ...g, id: i }));
+        posInserida = 1;
+      } else {
+        const num = parseInt(document.getElementById('gcm-add-pos-num').value);
+        if (!num || num < 1 || num > guards.length + 1) { showToast('Posição inválida!'); return; }
+        guards.splice(num - 1, 0, novoGuard);
+        guards = guards.map((g, i) => ({ ...g, id: i }));
+        posInserida = num;
+      }
+      closeGerenciar();
+      renderList();
+      showToast(nome + ' adicionado na posição ' + posInserida + 'º');
+      const hist = criarEntradaHistorico('add', nome + ' adicionado à lista na posição ' + posInserida + 'º');
+      await salvarNoFirebase(hist);
+    }
+
+    function pedirDel(guardId) {
+      const g = guards.find(g => g.id === guardId);
+      if (!g) return;
+      pendingDelId = guardId;
+      const pos = guards.indexOf(g) + 1;
+      document.getElementById('del-msg').textContent = 'Tem certeza que deseja remover "' + g.name + '" (' + pos + 'º) da lista?';
+      document.getElementById('del-overlay').classList.add('open');
+    }
+
+    function cancelDel() {
+      document.getElementById('del-overlay').classList.remove('open');
+      pendingDelId = null;
+    }
+
+    async function confirmarDel() {
+      if (pendingDelId === null) return;
+      const g = guards.find(g => g.id === pendingDelId);
+      if (!g) return;
+      const pos = guards.indexOf(g) + 1;
+      lastSnapshot = guards.map(g => ({ ...g }));
+      guards = guards.filter(g => g.id !== pendingDelId);
+      guards = guards.map((g, i) => ({ ...g, id: i }));
+      pendingDelId = null;
+      document.getElementById('del-overlay').classList.remove('open');
+      renderList();
+      showToast(g.name + ' removido da lista');
+      const hist = criarEntradaHistorico('del', g.name + ' removido da lista (era ' + pos + 'º)');
+      await salvarNoFirebase(hist);
+    }
+
+    window._openGerenciar = openGerenciar;
+    window._closeGerenciar = closeGerenciar;
+    window._gcmAddNomeInput = gcmAddNomeInput;
+    window._confirmarAddGcm = confirmarAddGcm;
+    window._pedirDel = pedirDel;
+    window._cancelDel = cancelDel;
+    window._confirmarDel = confirmarDel;
+
     // ---- HISTÓRICO ----
     async function openHistorico() {
       document.getElementById('hist-overlay').classList.add('open');
@@ -1466,8 +1621,8 @@
           body.innerHTML = '<div class="hist-empty">Nenhuma movimentação registrada ainda.</div>';
           return;
         }
-        const iconMap = { fim: '⬇', pos: '✎', dist: '📋', undo: '↩' };
-        const classMap = { fim: 'fim', pos: 'pos', dist: 'dist', undo: 'undo' };
+        const iconMap = { fim: '⬇', pos: '✎', dist: '📋', undo: '↩', add: '➕', del: '🗑' };
+        const classMap = { fim: 'fim', pos: 'pos', dist: 'dist', undo: 'undo', add: 'pos', del: 'fim' };
         const sorted = [...historico].reverse();
         body.innerHTML = sorted.map(h => {
           const dt = new Date(h.timestamp);
@@ -1510,6 +1665,7 @@
         const actions = isAdmin
           ? `<div class="guard-actions">
            <button class="btn-edit-pos" title="Editar posição" onclick="event.stopPropagation(); window._openEditPos(${g.id})">✎</button>
+           <button class="btn-edit-pos" title="Remover GCM" style="color:#E24B4A;border-color:#E24B4A;" onclick="event.stopPropagation(); window._pedirDel(${g.id})">🗑</button>
            <button class="btn-move${isLast ? '' : ' danger'}" onclick="event.stopPropagation(); window._askConfirm(${g.id})">${isLast ? 'Fim' : 'Ir pro fim'}</button>
          </div>`
           : '';
